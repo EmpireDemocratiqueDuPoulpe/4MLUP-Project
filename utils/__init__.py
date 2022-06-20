@@ -6,3 +6,4 @@
 from . import dataframe
 from . import print
 from . import text
+from . import visualizer

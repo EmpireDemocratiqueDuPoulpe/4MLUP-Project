@@ -3,7 +3,9 @@ from datetime import timedelta
 import colorama
 from colorama import Style, Fore
 import pandas
-import numpy
+from sklearn.cluster import KMeans
+from sklearn.model_selection import train_test_split
+
 import utils
 
 
@@ -29,7 +31,7 @@ def main():
 
     # Keep only interesting columns
     utils.print.title("Keep only interesting columns")
-    data = data[["Country", "Anthem"]]
+    data = data[["Country", "Continent", "Anthem"]]
     print(data.sample(n=5))
 
     # Text preprocessing
@@ -49,6 +51,36 @@ def main():
 
     print(f"Vectorized:\n{Style.DIM}{Fore.WHITE}{vectorized_data.head()}")
     print(f"TFIDF Vectorized:\n{Style.DIM}{Fore.WHITE}{tfidf_vectorized_data.head()}")
+
+    """data_x = utils.text.tfidf_vectorization(data, col="Anthem", analyzer=text_preprocessing)
+    data_y = data["Continent"]
+    x_train, x_test, y_train, y_test = train_test_split(data_x, data_y, test_size=0.2)
+    print(x_train)
+    print(y_train)"""
+
+    # KMeans
+    utils.print.title("Text preprocessing")
+    model_kwargs = {"init": "k-means++"}
+
+    utils.print.title("KElbowVisualizer", char="~")
+    elbow_optimal_k = utils.visualizer.k_elbow(tfidf_vectorized_data, KMeans, k=(2, 20), verbose=True, **model_kwargs)
+
+    utils.print.title("SilhouetteVisualizer", char="~")
+    silhouette_optimal_k = utils.visualizer.silhouette(tfidf_vectorized_data, KMeans, k=(2, 20), verbose=True, **model_kwargs)
+
+    utils.print.title("Optimal model", char="~")
+    optimal_k = int(round(((elbow_optimal_k + silhouette_optimal_k) / 2), 0))
+    model_kwargs["n_clusters"] = optimal_k
+
+    print(f"Using {Fore.LIGHTGREEN_EX}n_clusters={optimal_k}{Fore.RESET} for KMeans()")
+    k_means = KMeans(**model_kwargs)
+    k_fit = k_means.fit(tfidf_vectorized_data)
+
+    data["Cluster"] = k_fit.labels_
+    print(data.sample(n=10))
+
+    utils.visualizer.inter_cluster_distance(tfidf_vectorized_data, KMeans(**model_kwargs))
+    # utils.visualizer.pca(vectorized_data, data[["Cluster"]], classes=data["Cluster"].drop_duplicates().tolist())
 
     # Program end
     program_end = timer()
