@@ -9,11 +9,14 @@ import webbrowser
 import pandas
 import geopandas
 import folium
-from folium import plugins
+from nltk.corpus import stopwords
+from wordcloud import WordCloud
+from matplotlib import pyplot
 
 folium_data = "https://raw.githubusercontent.com/python-visualization/folium/master/examples/data"
 
 
+# #### Map & MapLayer ##################################################################################################
 class Map:
     TILE_LAYERS = [
         {"name": "openstreetmap", "display_name": "Open Street Map"},
@@ -124,3 +127,20 @@ class MapLayer:
         self._add_to_layer(choropleth)
 
         return self
+
+
+# #### Wordcloud #######################################################################################################
+def generate_wordcloud(word_list: list, title: str = "Word cloud", language: str = "english"):
+    words = " ".join(word for word in word_list)
+    cloud = WordCloud(
+        background_color="white", colormap="winter",
+        width=1600, height=800,
+        max_words=50, max_font_size=200,
+        stopwords=stopwords.words(language), normalize_plurals=True
+    ).generate(words)
+
+    pyplot.figure(figsize=(12, 10))
+    pyplot.title(title)
+    pyplot.axis("off")
+    pyplot.imshow(cloud, interpolation="bilinear")
+    pyplot.show()

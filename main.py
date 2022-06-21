@@ -96,6 +96,8 @@ def main():
 
     clusters_map.open(notebook=False)
 
+    utils.plot.generate_wordcloud(data["Anthem"], title="Le Wordcloud")
+
     # Program end
     program_end = timer()
     program_elapsed_time = timedelta(seconds=program_end - program_start)
