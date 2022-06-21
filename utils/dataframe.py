@@ -8,7 +8,7 @@ from colorama import Style, Fore
 
 
 def first_look(df: pandas.DataFrame):
-    print(f"Shape: {Fore.LIGHTGREEN_EX}{df.shape}")
+    print(f"Shape: {Fore.LIGHTGREEN_EX}{df.shape}{Fore.RESET}")
     print(df.head())
     print(df.dtypes)
 
@@ -26,4 +26,4 @@ def missing_values(df: pandas.DataFrame, keep_zeros=True):
     print(f"Valeurs manquantes: {Fore.LIGHTGREEN_EX}{missing}%")
 
     if len(missing_df) > 0:
-        print(f"{Style.DIM}{Fore.WHITE}{missing_df}")
+        print(f"{Style.DIM}{Fore.WHITE}{missing_df}{Style.RESET_ALL}")

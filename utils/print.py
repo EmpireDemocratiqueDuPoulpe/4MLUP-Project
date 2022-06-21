@@ -9,6 +9,6 @@ from colorama import Fore
 
 def title(text, char="#"):
     terminal_width = shutil.get_terminal_size().columns
-    txt = f"{Fore.GREEN}{char * 4} {text}"
+    txt = f"{Fore.GREEN}{char * 4} {text}{Fore.RESET}"
 
     print(f"\n{txt} {char * (terminal_width - len(txt))}")

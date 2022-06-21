@@ -16,7 +16,7 @@ def k_elbow(data, model, k: tuple, verbose: bool = False, **kwargs):
     optimal_k = visualizer.elbow_value_
 
     if verbose:
-        print(f"Optimal number of k cluster: {Fore.LIGHTGREEN_EX}{optimal_k}")
+        print(f"Optimal number of k cluster: {Fore.LIGHTGREEN_EX}{optimal_k}{Fore.RESET}")
 
     return optimal_k
 
@@ -45,8 +45,8 @@ def silhouette(data, model, k: tuple, verbose: bool = False, **kwargs):
 
     if verbose:
         print((
-            f"Optimal number of k cluster: {Fore.LIGHTGREEN_EX}{optimal_k} "
-            f"{Style.DIM}{Fore.WHITE}(score: {round(best_score, 2)})"
+            f"Optimal number of k cluster: {Fore.LIGHTGREEN_EX}{optimal_k}{Fore.RESET} "
+            f"{Style.DIM}{Fore.WHITE}(score: {round(best_score, 2)}){Style.RESET_ALL}"
         ))
 
     return optimal_k
