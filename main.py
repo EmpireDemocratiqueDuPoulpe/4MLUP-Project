@@ -65,12 +65,14 @@ def main():
         #    "model": KMeans,
         #    "silhouette": True,
         #    "inter-cluster": True,
+        #    "dendrogram": False,
         #    "kwargs": {"init": "k-means++"}
         # },
         "agglomerative_clustering": {
             "model": AgglomerativeClustering,
             "silhouette": False,
             "inter-cluster": False,
+            "dendrogram": True,
             "kwargs": {"affinity": "euclidean", "linkage": "ward", "compute_distances": True}
         }
     }
@@ -120,6 +122,10 @@ def main():
 
         # PCA
         utils.plot.pca(tfidf_vectorized_data, cluster_row_name, f"{model_key} with n_clusters={optimal_k}")
+
+        # Dendrogram
+        if model_infos["dendrogram"]:
+            utils.plot.dendrogram(optimal_model)
 
         # Cluster per countries
         clusters_map = utils.plot.Map()

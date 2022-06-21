@@ -6,6 +6,7 @@
 import os
 import time
 import webbrowser
+import numpy
 import pandas
 import geopandas
 import folium
@@ -13,6 +14,7 @@ from nltk.corpus import stopwords
 from sklearn.decomposition import PCA
 from wordcloud import WordCloud
 from matplotlib import pyplot
+from scipy.cluster import hierarchy
 
 folium_data = "https://raw.githubusercontent.com/python-visualization/folium/master/examples/data"
 
@@ -156,3 +158,25 @@ def generate_wordcloud(word_list: list, title: str = "Word cloud", language: str
     pyplot.axis("off")
     pyplot.imshow(cloud, interpolation="bilinear")
     pyplot.show()
+
+
+# #### Dendrogram ######################################################################################################
+def dendrogram(model):
+    counts = numpy.zeros(model.children_.shape[0])
+    n_samples = len(model.labels_)
+
+    for i, merge in enumerate(model.children_):
+        curr_count = 0
+
+        for child_i in merge:
+            if child_i < n_samples:
+                curr_count += 1
+            else:
+                curr_count += counts[child_i - n_samples]
+
+        counts[i] = curr_count
+
+    linkage_matrix = numpy.column_stack([model.children_, model.distances_, counts]).astype(float)
+    hierarchy.dendrogram(linkage_matrix)
+    pyplot.show()
+
