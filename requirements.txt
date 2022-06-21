@@ -4,3 +4,4 @@ nltk~=3.7
 scikit-learn~=1.0.2
 yellowbrick~=1.4
 unidecode~=1.2.0
+folium~=0.12.1.post1

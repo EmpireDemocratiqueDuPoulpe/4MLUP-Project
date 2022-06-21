@@ -4,6 +4,7 @@
 # #################################################################################################################### #
 
 from . import dataframe
+from . import plot
 from . import print
 from . import text
 from . import visualizer

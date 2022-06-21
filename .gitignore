@@ -1,2 +1,6 @@
 # IDE
 .idea/
+
+# Generated Map
+./temp
+!./temp/.keep

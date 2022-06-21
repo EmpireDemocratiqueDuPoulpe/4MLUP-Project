@@ -4,8 +4,6 @@ import colorama
 from colorama import Style, Fore
 import pandas
 from sklearn.cluster import KMeans
-from sklearn.model_selection import train_test_split
-
 import utils
 
 
@@ -31,8 +29,8 @@ def main():
 
     # Keep only interesting columns
     utils.print.title("Keep only interesting columns")
-    data = data[["Country", "Continent", "Anthem"]]
-    print(data.sample(n=5))
+    models_data = data[["Anthem"]]
+    print(models_data.sample(n=5))
 
     # Text preprocessing
     utils.print.title("Text preprocessing")
@@ -49,14 +47,14 @@ def main():
 
         return token
 
-    vectorized_data = utils.text.vectorization(data, col="Anthem", analyzer=text_preprocessing)
-    tfidf_vectorized_data = utils.text.tfidf_vectorization(data, col="Anthem", analyzer=text_preprocessing)
+    vectorized_data = utils.text.vectorization(models_data, col="Anthem", analyzer=text_preprocessing)
+    tfidf_vectorized_data = utils.text.tfidf_vectorization(models_data, col="Anthem", analyzer=text_preprocessing)
 
     print(f"Vectorized:\n{Style.DIM}{Fore.WHITE}{vectorized_data.head()}")
     print(f"TFIDF Vectorized:\n{Style.DIM}{Fore.WHITE}{tfidf_vectorized_data.head()}")
 
-    """data_x = utils.text.tfidf_vectorization(data, col="Anthem", analyzer=text_preprocessing)
-    data_y = data["Continent"]
+    """data_x = utils.text.tfidf_vectorization(models_data, col="Anthem", analyzer=text_preprocessing)
+    data_y = models_data["Continent"]
     x_train, x_test, y_train, y_test = train_test_split(data_x, data_y, test_size=0.2)
     print(x_train)
     print(y_train)"""
@@ -84,6 +82,19 @@ def main():
 
     utils.visualizer.inter_cluster_distance(tfidf_vectorized_data, KMeans(**model_kwargs))
     # utils.visualizer.pca(vectorized_data, data[["Cluster"]], classes=data["Cluster"].drop_duplicates().tolist())
+
+    clusters_map = utils.plot.Map()
+    utils.plot.MapLayer("Cluster per countries", show_default=True)\
+        .add_to(clusters_map)\
+        .load_dataframe(data)\
+        .to_choropleth(
+            geo_data=f"{utils.plot.folium_data}/world-countries.json",
+            columns=["Alpha-3", "Cluster"],
+            name="Cluster per countries",
+            legend_name="LEGEND",
+        )
+
+    clusters_map.open(notebook=False)
 
     # Program end
     program_end = timer()
