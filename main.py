@@ -61,13 +61,13 @@ def main():
 
     # Models
     models = {
-        # "k_means": {
-        #    "model": KMeans,
-        #    "silhouette": True,
-        #    "inter-cluster": True,
-        #    "dendrogram": False,
-        #    "kwargs": {"init": "k-means++"}
-        # },
+        "k_means": {
+            "model": KMeans,
+            "silhouette": True,
+            "inter-cluster": True,
+            "dendrogram": False,
+            "kwargs": {"init": "k-means++"}
+        },
         "agglomerative_clustering": {
             "model": AgglomerativeClustering,
             "silhouette": False,
@@ -142,7 +142,13 @@ def main():
         clusters_map.open(notebook=False)
 
         # Wordcloud
-        utils.plot.generate_wordcloud(data["Anthem"], title="Le Wordcloud")
+        clusters = data[cluster_row_name].drop_duplicates().sort_values().tolist()
+
+        for cluster in clusters:
+            utils.plot.generate_wordcloud(
+                data["Anthem"][data[cluster_row_name] == cluster],
+                title=f"Le Wordcloud - {model_key} (cluster {cluster + 1}/{clusters[-1] + 1}"
+            )
 
         # Model end
         model_end = timer()
