@@ -111,14 +111,15 @@ def main():
         cluster_row_name = f"Cluster_{model_key}"
 
         data[cluster_row_name] = optimal_fit.labels_
+        tfidf_vectorized_data[cluster_row_name] = optimal_fit.labels_
         print(data.sample(n=10))
 
         # Inter-cluster distance
         if model_infos["inter-cluster"]:
             utils.visualizer.inter_cluster_distance(tfidf_vectorized_data, model_infos["model"](**model_infos["kwargs"]))
-            # utils.visualizer.pca(
-            #   vectorized_data, data[["cluster_row_name"]], classes=data["cluster_row_name"].drop_duplicates().tolist()
-            # )
+
+        # PCA
+        utils.plot.pca(tfidf_vectorized_data, cluster_row_name, f"{model_key} with n_clusters={optimal_k}")
 
         # Cluster per countries
         clusters_map = utils.plot.Map()

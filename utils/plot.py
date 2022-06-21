@@ -10,6 +10,7 @@ import pandas
 import geopandas
 import folium
 from nltk.corpus import stopwords
+from sklearn.decomposition import PCA
 from wordcloud import WordCloud
 from matplotlib import pyplot
 
@@ -127,6 +128,17 @@ class MapLayer:
         self._add_to_layer(choropleth)
 
         return self
+
+
+# #### PCA #############################################################################################################
+def pca(data: pandas.DataFrame, cluster_col: str, title: str = None):
+    data_pca = pandas.DataFrame(PCA(n_components=2).fit_transform(data), columns=["pca1", "pca2"])
+    pyplot.scatter(data_pca["pca1"], data_pca["pca2"], c=data[cluster_col], s=50)
+
+    if title is not None:
+        pyplot.title(title)
+
+    pyplot.show()
 
 
 # #### Wordcloud #######################################################################################################
