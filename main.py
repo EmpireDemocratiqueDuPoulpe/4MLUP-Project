@@ -3,7 +3,7 @@ from datetime import timedelta
 import colorama
 from colorama import Style, Fore
 import pandas
-from sklearn.cluster import KMeans
+from sklearn.cluster import KMeans, AgglomerativeClustering
 import utils
 
 
@@ -59,44 +59,88 @@ def main():
     print(x_train)
     print(y_train)"""
 
-    # KMeans
-    utils.print.title("Text preprocessing")
-    model_kwargs = {"init": "k-means++"}
+    # Models
+    models = {
+        # "k_means": {
+        #    "model": KMeans,
+        #    "silhouette": True,
+        #    "inter-cluster": True,
+        #    "kwargs": {"init": "k-means++"}
+        # },
+        "agglomerative_clustering": {
+            "model": AgglomerativeClustering,
+            "silhouette": False,
+            "inter-cluster": False,
+            "kwargs": {"affinity": "euclidean", "linkage": "ward", "compute_distances": True}
+        }
+    }
+    k_range = (2, 20)
 
-    utils.print.title("KElbowVisualizer", char="~")
-    elbow_optimal_k = utils.visualizer.k_elbow(tfidf_vectorized_data, KMeans, k=(2, 20), verbose=True, **model_kwargs)
+    for model_key in models:
+        # Get model
+        utils.print.title(f"Text processing with {model_key}")
+        model_start = timer()
+        model_infos = models[model_key]
 
-    utils.print.title("SilhouetteVisualizer", char="~")
-    silhouette_optimal_k = utils.visualizer.silhouette(tfidf_vectorized_data, KMeans, k=(2, 20), verbose=True, **model_kwargs)
-
-    utils.print.title("Optimal model", char="~")
-    optimal_k = int(round(((elbow_optimal_k + silhouette_optimal_k) / 2), 0))
-    model_kwargs["n_clusters"] = optimal_k
-
-    print(f"Using {Fore.LIGHTGREEN_EX}n_clusters={optimal_k}{Fore.RESET} for KMeans()")
-    k_means = KMeans(**model_kwargs)
-    k_fit = k_means.fit(tfidf_vectorized_data)
-
-    data["Cluster"] = k_fit.labels_
-    print(data.sample(n=10))
-
-    utils.visualizer.inter_cluster_distance(tfidf_vectorized_data, KMeans(**model_kwargs))
-    # utils.visualizer.pca(vectorized_data, data[["Cluster"]], classes=data["Cluster"].drop_duplicates().tolist())
-
-    clusters_map = utils.plot.Map()
-    utils.plot.MapLayer("Cluster per countries", show_default=True)\
-        .add_to(clusters_map)\
-        .load_dataframe(data)\
-        .to_choropleth(
-            geo_data=f"{utils.plot.folium_data}/world-countries.json",
-            columns=["Alpha-3", "Cluster"],
-            name="Cluster per countries",
-            legend_name="LEGEND",
+        # Elbow and Silhouette visualizers
+        utils.print.title("KElbowVisualizer", char="~")
+        elbow_optimal_k = utils.visualizer.k_elbow(
+            tfidf_vectorized_data, model_infos["model"],
+            k=k_range, verbose=True,
+            **model_infos["kwargs"]
         )
 
-    clusters_map.open(notebook=False)
+        if model_infos["silhouette"]:
+            utils.print.title("SilhouetteVisualizer", char="~")
+            silhouette_optimal_k = utils.visualizer.silhouette(
+                tfidf_vectorized_data, model_infos["model"],
+                k=k_range, verbose=True,
+                **model_infos["kwargs"]
+            )
+        else:
+            silhouette_optimal_k = elbow_optimal_k
 
-    utils.plot.generate_wordcloud(data["Anthem"], title="Le Wordcloud")
+        # Use optimal k
+        utils.print.title("Optimal model", char="~")
+        optimal_k = int(round(((elbow_optimal_k + silhouette_optimal_k) / 2), 0))
+        model_infos["kwargs"]["n_clusters"] = optimal_k
+
+        print(f"Using {Fore.LIGHTGREEN_EX}n_clusters={optimal_k}{Fore.RESET}")
+        optimal_model = model_infos["model"](**model_infos["kwargs"])
+        optimal_fit = optimal_model.fit(tfidf_vectorized_data)
+        cluster_row_name = f"Cluster_{model_key}"
+
+        data[cluster_row_name] = optimal_fit.labels_
+        print(data.sample(n=10))
+
+        # Inter-cluster distance
+        if model_infos["inter-cluster"]:
+            utils.visualizer.inter_cluster_distance(tfidf_vectorized_data, model_infos["model"](**model_infos["kwargs"]))
+            # utils.visualizer.pca(
+            #   vectorized_data, data[["cluster_row_name"]], classes=data["cluster_row_name"].drop_duplicates().tolist()
+            # )
+
+        # Cluster per countries
+        clusters_map = utils.plot.Map()
+        utils.plot.MapLayer("Cluster per countries", show_default=True) \
+            .add_to(clusters_map) \
+            .load_dataframe(data) \
+            .to_choropleth(
+            geo_data=f"{utils.plot.folium_data}/world-countries.json",
+            columns=["Alpha-3", cluster_row_name],
+            name="Cluster per countries",
+            legend_name="Cluster IDs",
+        )
+
+        clusters_map.open(notebook=False)
+
+        # Wordcloud
+        utils.plot.generate_wordcloud(data["Anthem"], title="Le Wordcloud")
+
+        # Model end
+        model_end = timer()
+        model_elapsed_time = timedelta(seconds=model_end - model_start)
+        print(f"\n{Fore.LIGHTBLUE_EX}Finished in {model_elapsed_time}.\n")
 
     # Program end
     program_end = timer()

@@ -27,7 +27,7 @@ def silhouette(data, model, k: tuple, verbose: bool = False, **kwargs):
     # Try each num_k
     for num_k in range(k[0], k[1]):
         # Random state is used for reproducibility
-        curr_model = model(n_clusters=num_k, random_state=(k[0] + k[1]), **kwargs)
+        curr_model = model(**{**kwargs, "n_clusters": num_k})
         model_labels = curr_model.fit_predict(data)
 
         silhouette_avg = silhouette_score(data, model_labels)
