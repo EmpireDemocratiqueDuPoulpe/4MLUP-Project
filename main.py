@@ -42,7 +42,10 @@ def main():
         token = utils.text.tokenize(text_cleaned, language="english")
         token = utils.text.remove_stopwords(token, language="english")
         token = utils.text.remove_punctuation(token)
-        token = utils.text.lemmatize(token)
+
+        # PorterStemmer seems to produce less stable model, but it has a much better
+        # inter-cluster distance than WordNetLemmatizer.
+        token = utils.text.stem(token)
 
         return token
 
