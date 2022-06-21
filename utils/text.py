@@ -6,6 +6,7 @@
 import re
 import string
 import pandas
+from unidecode import unidecode
 from nltk import PorterStemmer, WordNetLemmatizer
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
@@ -16,6 +17,7 @@ def clean(text):
     text = text.lower()  # Lower case
     text = re.sub(r"\W+", " ", text)  # Remove special characters
     text = re.sub(r"\d", "", text)  # Remove numbers
+    text = unidecode(unidecode(text, "utf-8"))  # Remove accents
     text = re.sub(r"\s+", " ", text)  # Replace multi-space by single one
     text = re.sub(r"^\s/\s$", "", text)  # Trim space at beginning and end
     text = re.sub(r"\s+[a-zA-Z]\s+", "", text)  # Remove single characters
